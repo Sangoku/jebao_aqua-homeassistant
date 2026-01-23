@@ -15,7 +15,7 @@ from .api import GizwitsApi
 from .discovery import discover_devices
 from .helpers import is_device_data_valid  # Add this import
 
-PLATFORMS = ["switch", "binary_sensor", "select", "number"]
+PLATFORMS = ["switch", "binary_sensor", "select", "number", "sensor"]
 
 
 async def async_setup(hass: HomeAssistant, config: dict):

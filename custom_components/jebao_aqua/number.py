@@ -14,10 +14,11 @@ from .helpers import (
 class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
     """Representation of a Jebao Pump Number Entity."""
 
-    def __init__(self, coordinator, device, attribute):
+    def __init__(self, coordinator, device, attribute, attribute_models):
         super().__init__(coordinator)
         self._device = device
         self._attribute = attribute
+        self._attribute_models = attribute_models
         device_id = device.get("did")
         device_name = device.get("dev_alias") or device.get("did")
 
@@ -56,7 +57,7 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
     @property
     def device_info(self):
         """Return information about the device this entity belongs to."""
-        return get_device_info(self._device)
+        return get_device_info(self._device, self._attribute_models)
 
     @property
     def name(self) -> str:
@@ -88,6 +89,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
         if model:
             for attr in model["attrs"]:
                 if attr["type"] == "status_writable" and attr["data_type"] == "uint8":
-                    numbers.append(JebaoPumpNumber(coordinator, device, attr))
+                    numbers.append(JebaoPumpNumber(coordinator, device, attr, attribute_models))
 
     async_add_entities(numbers)

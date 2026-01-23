@@ -8,6 +8,8 @@ from .helpers import (
     create_unique_id,
     is_device_data_valid,
     get_attribute_value,
+    parse_channel_names,
+    get_channel_name_from_attribute,
 )
 import asyncio
 
@@ -15,15 +17,19 @@ import asyncio
 class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
     """Representation of a Jebao Pump Switch."""
 
-    def __init__(self, coordinator, device, attribute):
+    def __init__(self, coordinator, device, attribute, attribute_models, custom_name=None):
         super().__init__(coordinator)
         self._device = device
         self._attribute = attribute
+        self._attribute_models = attribute_models
         device_id = device.get("did")
         device_name = device.get("dev_alias") or device.get("did")
 
+        # Use custom name if provided, otherwise use display_name
+        display_name = custom_name if custom_name else attribute["display_name"]
+
         # Use helper functions for consistent entity properties
-        self._attr_name = create_entity_name(device_name, attribute["display_name"])
+        self._attr_name = create_entity_name(device_name, display_name)
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("switch", device_name, attribute["name"])
 
@@ -58,7 +64,7 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
     @property
     def device_info(self):
         """Return information about the device this entity belongs to."""
-        return get_device_info(self._device)
+        return get_device_info(self._device, self._attribute_models)
 
     @property
     def name(self) -> str:
@@ -87,9 +93,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
         product_key = device.get("product_key")
         model = attribute_models.get(product_key)
 
+        # Parse custom channel names for this device
+        channel_names = parse_channel_names(device)
+
         if model:
             for attr in model["attrs"]:
                 if attr["type"] == "status_writable" and attr["data_type"] == "bool":
-                    switches.append(JebaoPumpSwitch(coordinator, device, attr))
+                    # Check if this is a timer switch and if we have a custom name
+                    custom_name = None
+                    if attr["name"].startswith("Timer") and attr["name"].endswith("ON"):
+                        channel_name = get_channel_name_from_attribute(attr["name"], channel_names)
+                        if channel_name:
+                            custom_name = f"{channel_name} Timer"
+                    
+                    switches.append(JebaoPumpSwitch(coordinator, device, attr, attribute_models, custom_name))
 
     async_add_entities(switches)

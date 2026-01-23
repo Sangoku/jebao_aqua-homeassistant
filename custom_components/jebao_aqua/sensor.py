@@ -1,6 +1,8 @@
 """Sensor platform for Jebao Aqua."""
 from __future__ import annotations
 
+import json
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -14,7 +16,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Jebao Aqua sensors."""
+    from .const import LOGGER
+    
     coordinator = hass.data[DOMAIN][config_entry.entry_id]["coordinator"]
+    attribute_models = hass.data[DOMAIN][config_entry.entry_id]["attribute_models"]
+    
+    LOGGER.debug(f"Setting up sensor platform with {len(coordinator.device_inventory)} devices")
     
     entities = []
     # Iterate through device inventory to get product_key
@@ -22,14 +29,36 @@ async def async_setup_entry(
         device_id = device_info.get("did")
         product_key = device_info.get("product_key")
         
+        LOGGER.debug(f"Checking device {device_id} with product_key {product_key}")
+        
         # Check if this is an MD-4.5 doser with schedule data
         if product_key == "5ab6019f2dbb4ae7a42b48d2b8ce0530":
+            LOGGER.info(f"Creating schedule sensors for MD-4.5 device {device_id}")
+            
+            # Parse channel names from remark field
+            channel_names = {}
+            remark = device_info.get("remark", "")
+            if remark:
+                try:
+                    remark_data = json.loads(remark)
+                    names = remark_data.get("names", {})
+                    # Convert CHANNEL_1 format to channel number
+                    for key, value in names.items():
+                        if key.startswith("CHANNEL_"):
+                            channel_num = int(key.split("_")[1])
+                            channel_names[channel_num] = value
+                    LOGGER.info(f"Loaded channel names: {channel_names}")
+                except (json.JSONDecodeError, ValueError, KeyError) as e:
+                    LOGGER.warning(f"Failed to parse channel names from remark: {e}")
+            
             # Create schedule sensors for each channel
             for channel in range(1, 6):  # Channels 1-5
+                channel_name = channel_names.get(channel)
                 entities.append(
-                    JebaoChannelScheduleSensor(coordinator, device_id, channel)
+                    JebaoChannelScheduleSensor(coordinator, device_id, channel, attribute_models, channel_name)
                 )
     
+    LOGGER.info(f"Adding {len(entities)} schedule sensor entities")
     if entities:
         async_add_entities(entities)
 
@@ -37,23 +66,30 @@ async def async_setup_entry(
 class JebaoChannelScheduleSensor(SensorEntity):
     """Sensor showing channel dosing schedule."""
 
-    def __init__(self, coordinator, device_id: str, channel: int) -> None:
+    def __init__(self, coordinator, device_id: str, channel: int, attribute_models, channel_name: str = None) -> None:
         """Initialize the sensor."""
         self._coordinator = coordinator
         self._device_id = device_id
         self._channel = channel
-        self._attr_name = f"Channel {channel} Schedule"
+        self._attribute_models = attribute_models
+        self._channel_name = channel_name or f"Channel {channel}"
+        self._attr_name = f"{self._channel_name} Schedule"
         self._attr_unique_id = f"{device_id}_ch{channel}_schedule"
         
     @property
     def device_info(self):
         """Return device information."""
-        device = self._coordinator.data.get(self._device_id, {})
+        from .helpers import get_device_info
+        
+        # Get device info from inventory
+        device_info = next(
+            (d for d in self._coordinator.device_inventory if d["did"] == self._device_id),
+            None
+        )
+        if device_info:
+            return get_device_info(device_info, self._attribute_models)
         return {
             "identifiers": {(DOMAIN, self._device_id)},
-            "name": device.get("dev_alias", f"Jebao {self._device_id}"),
-            "manufacturer": "Jebao",
-            "model": device.get("product_name", "Unknown"),
         }
 
     @property

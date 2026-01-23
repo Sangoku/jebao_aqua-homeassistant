@@ -6,11 +6,64 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN, LOGGER
 
 
-def get_device_info(device):
+def parse_channel_names(device: dict) -> dict:
+    """Parse custom channel names from device remark field.
+    
+    Returns a dict mapping channel number to custom name.
+    Example: {1: "Peroxide", 2: "Te", 3: "Mg", 4: "Ca", 5: "KH"}
+    """
+    channel_names = {}
+    remark = device.get("remark", "")
+    if remark:
+        try:
+            remark_data = json.loads(remark)
+            names = remark_data.get("names", {})
+            # Convert CHANNEL_1 format to channel number
+            for key, value in names.items():
+                if key.startswith("CHANNEL_"):
+                    channel_num = int(key.split("_")[1])
+                    channel_names[channel_num] = value
+            LOGGER.debug(f"Parsed channel names for device {device.get('did')}: {channel_names}")
+        except (json.JSONDecodeError, ValueError, KeyError) as e:
+            LOGGER.debug(f"No custom channel names found or failed to parse: {e}")
+    return channel_names
+
+
+def get_channel_name_from_attribute(attribute_name: str, channel_names: dict) -> str:
+    """Extract channel number from attribute name and return custom name if available.
+    
+    Examples:
+    - "channe1" -> returns channel_names[1] or None
+    - "Timer1ON" -> returns channel_names[1] or None
+    """
+    # Try to extract channel number from various formats
+    import re
+    
+    # Match patterns like "channe1", "Timer1ON", etc.
+    match = re.search(r'(\d+)', attribute_name)
+    if match:
+        channel_num = int(match.group(1))
+        return channel_names.get(channel_num)
+    
+    return None
+
+
+def get_device_info(device, attribute_models=None):
     """Return standardized device information dictionary."""
-    device_name = device.get("dev_alias") or f"Device {device['did']}"
-    lan_ip = device.get("lan_ip")
+    # Try to get English name from model file first
+    device_name = None
     product_key = device.get("product_key", "")
+    
+    if attribute_models and product_key in attribute_models:
+        model = attribute_models[product_key]
+        device_name = model.get("name")
+        LOGGER.debug(f"Using English name from model: {device_name}")
+    
+    # Fall back to dev_alias or default
+    if not device_name:
+        device_name = device.get("dev_alias") or f"Device {device['did']}"
+    
+    lan_ip = device.get("lan_ip")
 
     info = {
         "identifiers": {(DOMAIN, device["did"])},

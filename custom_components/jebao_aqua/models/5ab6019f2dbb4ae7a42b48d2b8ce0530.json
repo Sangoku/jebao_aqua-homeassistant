@@ -134,70 +134,15 @@
       "desc": "Total number of channels"
     },
     {
-      "display_name": "Time 1",
+      "display_name": "Dose Duration",
       "name": "time1",
       "data_type": "uint8",
       "type": "status_writable",
       "id": 22,
-      "desc": "Timer 1 duration",
+      "desc": "Dosing duration in seconds",
       "unit": "s",
       "min": 1,
       "max": 60
-    },
-    {
-      "display_name": "Interval T1",
-      "name": "IntervalT1",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 23,
-      "desc": "Channel 1 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T2",
-      "name": "IntervalT2",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 24,
-      "desc": "Channel 2 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T3",
-      "name": "IntervalT3",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 25,
-      "desc": "Channel 3 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T4",
-      "name": "IntervalT4",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 26,
-      "desc": "Channel 4 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T5",
-      "name": "IntervalT5",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 27,
-      "desc": "Channel 5 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
     }
   ]
 }

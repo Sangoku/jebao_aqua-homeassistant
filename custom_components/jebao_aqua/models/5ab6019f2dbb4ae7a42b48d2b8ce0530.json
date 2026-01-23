@@ -51,30 +51,6 @@
       "desc": "Channel 5 timer enable"
     },
     {
-      "display_name": "Timer 6 Switch",
-      "name": "Timer6ON",
-      "data_type": "bool",
-      "type": "status_writable",
-      "id": 6,
-      "desc": "Channel 6 timer enable"
-    },
-    {
-      "display_name": "Timer 7 Switch",
-      "name": "Timer7ON",
-      "data_type": "bool",
-      "type": "status_writable",
-      "id": 7,
-      "desc": "Channel 7 timer enable"
-    },
-    {
-      "display_name": "Timer 8 Switch",
-      "name": "Timer8ON",
-      "data_type": "bool",
-      "type": "status_writable",
-      "id": 8,
-      "desc": "Channel 8 timer enable"
-    },
-    {
       "display_name": "Calibration Switch",
       "name": "CALSW",
       "data_type": "bool",
@@ -121,30 +97,6 @@
       "type": "status_readonly",
       "id": 14,
       "desc": "Channel 5 running status"
-    },
-    {
-      "display_name": "Channel 6 Status",
-      "name": "channe6",
-      "data_type": "bool",
-      "type": "status_readonly",
-      "id": 15,
-      "desc": "Channel 6 running status"
-    },
-    {
-      "display_name": "Channel 7 Status",
-      "name": "channe7",
-      "data_type": "bool",
-      "type": "status_readonly",
-      "id": 16,
-      "desc": "Channel 7 running status"
-    },
-    {
-      "display_name": "Channel 8 Status",
-      "name": "channe8",
-      "data_type": "bool",
-      "type": "status_readonly",
-      "id": 17,
-      "desc": "Channel 8 running status"
     },
     {
       "display_name": "Open Circuit Fault",
@@ -243,39 +195,6 @@
       "type": "status_writable",
       "id": 27,
       "desc": "Channel 5 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T6",
-      "name": "IntervalT6",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 28,
-      "desc": "Channel 6 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T7",
-      "name": "IntervalT7",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 29,
-      "desc": "Channel 7 interval time",
-      "unit": "h",
-      "min": 0,
-      "max": 24
-    },
-    {
-      "display_name": "Interval T8",
-      "name": "IntervalT8",
-      "data_type": "uint8",
-      "type": "status_writable",
-      "id": 30,
-      "desc": "Channel 8 interval time",
       "unit": "h",
       "min": 0,
       "max": 24

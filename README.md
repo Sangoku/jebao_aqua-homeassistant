@@ -16,15 +16,17 @@ _Note: I'm not a developer. This code was almost entirely written by ChatGPT bas
 | Device Model            | Compatibility  |
 |-------------------------|----------------|
 | Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
-| Jebao MCP Series Crossflow Wavemaker | ✅ Tested and working |
 | Jebao MLW Series Wavemaker      | ✅ Tested and working |
+| Jebao MLW-20 Wavemaker      | ✅ Added - WiFi only model |
 | Jebao SLW Series Wavemaker      | ⚠️ Added but not confirmed working |
 | Jebao EP Series Pump | ⚠️ Added but not confirmed working  |
 | Jebao Smart Doser 3.1 | ✅ Added by @jeffcybulski |
-| Jebao MD 4.4 Dosing Pump | ✅ Added by @jeffcybulski |
 | Jebao MD 2.4 Dosing Pump | ✅ Added by @joluan01 |
+| Jebao MD 4.4 Dosing Pump | ✅ Added by @jeffcybulski |
+| Jebao MD 4.5 Smart Doser | ✅ Added - 5 channel model |
+| Generic Wavemaker Pump | ✅ Added - basic wavemaker support |
 | Any WiFi+Bluetooth enabled Jebao device | ❌ Not working but under investigation | 
-| Other Jeabo Pumps | Not tested |
+| Other Jebao Pumps | Not tested |
 
 
 ## Background

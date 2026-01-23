@@ -34,6 +34,9 @@ class JebaoPumpSensor(CoordinatorEntity, BinarySensorEntity):
     @property
     def device_class(self):
         """Return the class of this device."""
+        # Use RUNNING device class for channel status sensors, PROBLEM for faults
+        if self._attribute["name"].startswith("channe"):
+            return BinarySensorDeviceClass.RUNNING
         return BinarySensorDeviceClass.PROBLEM
 
     @property
@@ -82,7 +85,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if model:
             for attr in model["attrs"]:
-                if attr["type"] == "fault" and attr["data_type"] == "bool":
+                # Create binary sensors for fault attributes and readonly status attributes (like channel running status)
+                if attr["data_type"] == "bool" and (attr["type"] == "fault" or attr["type"] == "status_readonly"):
                     sensors.append(JebaoPumpSensor(coordinator, device, attr))
 
     async_add_entities(sensors)

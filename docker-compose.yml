@@ -1,0 +1,16 @@
+version: '3'
+services:
+  homeassistant:
+    container_name: ha-jebao-dev
+    image: homeassistant/home-assistant:latest
+    volumes:
+      # Home Assistant configuration
+      - ./ha-config:/config
+      # Mount integration source code directly (for live editing)
+      - ./custom_components/jebao_aqua:/config/custom_components/jebao_aqua
+    environment:
+      - TZ=Europe/Vienna
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    privileged: true

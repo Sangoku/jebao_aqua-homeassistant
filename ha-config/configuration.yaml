@@ -1,0 +1,48 @@
+# Home Assistant Development Configuration
+# For Jebao Aqua Integration Testing
+
+# Load default integrations
+default_config:
+
+# Enable debug logging for Jebao integration
+logger:
+  default: info
+  logs:
+    custom_components.jebao_aqua: debug
+    custom_components.jebao_aqua.api: debug
+    custom_components.jebao_aqua.config_flow: debug
+    custom_components.jebao_aqua.discovery: debug
+    homeassistant.core: info
+    homeassistant.loader: info
+
+# Recorder - keep database small during development
+recorder:
+  purge_keep_days: 1
+  commit_interval: 30
+  db_url: sqlite:////config/home-assistant_v2.db
+
+# History settings
+history:
+  include:
+    domains:
+      - switch
+      - sensor
+      - binary_sensor
+      - select
+      - number
+
+# Enable the frontend
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Enable configuration UI
+config:
+
+# Text to speech (optional, can be disabled)
+tts:
+  - platform: google_translate
+
+# Automation (optional)
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml

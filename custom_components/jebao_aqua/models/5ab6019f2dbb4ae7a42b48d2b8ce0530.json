@@ -1,0 +1,284 @@
+{
+  "product_key": "5ab6019f2dbb4ae7a42b48d2b8ce0530",
+  "name": "Jebao MD-4.5 Smart Doser",
+  "attrs": [
+    {
+      "display_name": "Main Switch",
+      "name": "switch",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 0,
+      "desc": "Main power switch"
+    },
+    {
+      "display_name": "Timer 1 Switch",
+      "name": "Timer1ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 1,
+      "desc": "Channel 1 timer enable"
+    },
+    {
+      "display_name": "Timer 2 Switch",
+      "name": "Timer2ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 2,
+      "desc": "Channel 2 timer enable"
+    },
+    {
+      "display_name": "Timer 3 Switch",
+      "name": "Timer3ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 3,
+      "desc": "Channel 3 timer enable"
+    },
+    {
+      "display_name": "Timer 4 Switch",
+      "name": "Timer4ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 4,
+      "desc": "Channel 4 timer enable"
+    },
+    {
+      "display_name": "Timer 5 Switch",
+      "name": "Timer5ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 5,
+      "desc": "Channel 5 timer enable"
+    },
+    {
+      "display_name": "Timer 6 Switch",
+      "name": "Timer6ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 6,
+      "desc": "Channel 6 timer enable"
+    },
+    {
+      "display_name": "Timer 7 Switch",
+      "name": "Timer7ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 7,
+      "desc": "Channel 7 timer enable"
+    },
+    {
+      "display_name": "Timer 8 Switch",
+      "name": "Timer8ON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 8,
+      "desc": "Channel 8 timer enable"
+    },
+    {
+      "display_name": "Calibration Switch",
+      "name": "CALSW",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 9,
+      "desc": "Calibration mode switch"
+    },
+    {
+      "display_name": "Channel 1 Status",
+      "name": "channe1",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 10,
+      "desc": "Channel 1 running status"
+    },
+    {
+      "display_name": "Channel 2 Status",
+      "name": "channe2",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 11,
+      "desc": "Channel 2 running status"
+    },
+    {
+      "display_name": "Channel 3 Status",
+      "name": "channe3",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 12,
+      "desc": "Channel 3 running status"
+    },
+    {
+      "display_name": "Channel 4 Status",
+      "name": "channe4",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 13,
+      "desc": "Channel 4 running status"
+    },
+    {
+      "display_name": "Channel 5 Status",
+      "name": "channe5",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 14,
+      "desc": "Channel 5 running status"
+    },
+    {
+      "display_name": "Channel 6 Status",
+      "name": "channe6",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 15,
+      "desc": "Channel 6 running status"
+    },
+    {
+      "display_name": "Channel 7 Status",
+      "name": "channe7",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 16,
+      "desc": "Channel 7 running status"
+    },
+    {
+      "display_name": "Channel 8 Status",
+      "name": "channe8",
+      "data_type": "bool",
+      "type": "status_readonly",
+      "id": 17,
+      "desc": "Channel 8 running status"
+    },
+    {
+      "display_name": "Open Circuit Fault",
+      "name": "OpenCircuit",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 18,
+      "desc": "Open circuit fault"
+    },
+    {
+      "display_name": "UART Fault",
+      "name": "Fault_UART",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 19,
+      "desc": "UART communication fault"
+    },
+    {
+      "display_name": "Calibration Value",
+      "name": "Calib1",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 20,
+      "desc": "Calibration value",
+      "unit": "mL",
+      "min": 1,
+      "max": 100
+    },
+    {
+      "display_name": "Channel Total",
+      "name": "channelTTL",
+      "data_type": "uint8",
+      "type": "status_readonly",
+      "id": 21,
+      "desc": "Total number of channels"
+    },
+    {
+      "display_name": "Time 1",
+      "name": "time1",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 22,
+      "desc": "Timer 1 duration",
+      "unit": "s",
+      "min": 1,
+      "max": 60
+    },
+    {
+      "display_name": "Interval T1",
+      "name": "IntervalT1",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 23,
+      "desc": "Channel 1 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T2",
+      "name": "IntervalT2",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 24,
+      "desc": "Channel 2 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T3",
+      "name": "IntervalT3",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 25,
+      "desc": "Channel 3 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T4",
+      "name": "IntervalT4",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 26,
+      "desc": "Channel 4 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T5",
+      "name": "IntervalT5",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 27,
+      "desc": "Channel 5 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T6",
+      "name": "IntervalT6",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 28,
+      "desc": "Channel 6 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T7",
+      "name": "IntervalT7",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 29,
+      "desc": "Channel 7 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    },
+    {
+      "display_name": "Interval T8",
+      "name": "IntervalT8",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 30,
+      "desc": "Channel 8 interval time",
+      "unit": "h",
+      "min": 0,
+      "max": 24
+    }
+  ]
+}

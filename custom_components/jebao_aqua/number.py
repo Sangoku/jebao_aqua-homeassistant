@@ -27,11 +27,9 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
         self.entity_id = create_entity_id("number", device_name, attribute["name"])
 
         # Set native min, max, step, and unit from the attribute's specification
-        self._attr_native_min_value = attribute["uint_spec"]["min"]
-        self._attr_native_max_value = attribute["uint_spec"]["max"]
-        self._attr_native_step = attribute["uint_spec"].get(
-            "step", 1
-        )  # Default step to 1 if not specified
+        self._attr_native_min_value = attribute.get("min", 0)
+        self._attr_native_max_value = attribute.get("max", 100)
+        self._attr_native_step = attribute.get("step", 1)  # Default step to 1 if not specified
         # Set the unit of measurement if applicable
         self._attr_native_unit_of_measurement = attribute.get("unit")
 

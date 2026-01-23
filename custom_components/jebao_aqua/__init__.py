@@ -70,7 +70,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         token=token,
     )
 
-    async with api:
+    # Initialize the API session (don't use async with - we need it to persist)
+    await api.__aenter__()
+    
+    try:
         api.add_attribute_models(attribute_models)
         coordinator = GizwitsDataUpdateCoordinator(hass, api)
         await coordinator.fetch_initial_device_list(entry)
@@ -79,6 +82,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             await coordinator.async_config_entry_first_refresh()
         except Exception as err:
             LOGGER.error("Error setting up entry: %s", err)
+            await api.__aexit__(None, None, None)
             raise ConfigEntryNotReady from err
 
         hass.data[DOMAIN][entry.entry_id] = {
@@ -109,6 +113,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
         return True
+    except Exception as e:
+        # Clean up API session if setup fails
+        await api.__aexit__(None, None, None)
+        raise
 
 
 class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
@@ -161,13 +169,32 @@ class GizwitsDataUpdateCoordinator(DataUpdateCoordinator):
                 ),
                 None,
             )
+            
+            # Try local first if we have IP and model
             if device_info and "lan_ip" in device_info:
-                LOGGER.debug(
-                    f"Getting local data for device {device_id} at {device_info['lan_ip']}"
-                )
-                data = await self.api.get_local_device_data(
-                    device_info["lan_ip"], device_info["product_key"], device_id
-                )
+                product_key = device_info.get("product_key")
+                # Check if we have an attribute model for this device
+                has_model = self.api._attribute_models and product_key in self.api._attribute_models
+                
+                if has_model:
+                    LOGGER.debug(
+                        f"Getting local data for device {device_id} at {device_info['lan_ip']}"
+                    )
+                    data = await self.api.get_local_device_data(
+                        device_info["lan_ip"], product_key, device_id
+                    )
+                    
+                    # If local fails, fall back to cloud
+                    if not data or not is_device_data_valid(data):
+                        LOGGER.warning(
+                            f"Local data failed for {device_id}, falling back to cloud API"
+                        )
+                        data = await self.api.get_device_data(device_id)
+                else:
+                    LOGGER.info(
+                        f"No attribute model for {device_id} (product_key: {product_key}), using cloud API"
+                    )
+                    data = await self.api.get_device_data(device_id)
             else:
                 LOGGER.debug(f"Getting cloud data for device {device_id}")
                 data = await self.api.get_device_data(device_id)
@@ -246,6 +273,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
         if unload_ok:
+            # Close the API session
+            if DOMAIN in hass.data and entry.entry_id in hass.data[DOMAIN]:
+                api = hass.data[DOMAIN][entry.entry_id].get("api")
+                if api:
+                    await api.__aexit__(None, None, None)
+            
             # Clean up the entity registry
             ent_reg = async_get_entity_registry(hass)
             entities = [

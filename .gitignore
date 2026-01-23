@@ -1,0 +1,40 @@
+# Home Assistant Development Environment
+ha-config/.storage/
+ha-config/home-assistant.log*
+ha-config/home-assistant_v2.db*
+ha-config/.cloud/
+ha-config/deps/
+ha-config/tts/
+ha-config/.HA_VERSION
+ha-config/blueprints/
+ha-config/custom_components/*
+!ha-config/custom_components/.gitkeep
+ha-config/__pycache__/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak

@@ -315,9 +315,10 @@ class GizwitsApi:
     def _extract_device_status_payload(self, response):
         """Extract the device status payload from the response."""
         try:
-            # Find the pattern 0x00 0x00 0x00 0x03 in the response, this is marker for start of gizwits message
+            # Find the last occurrence of the pattern 0x00 0x00 0x00 0x03 in the response
+            # This is the marker for the start of the device status message
             pattern = b"\x00\x00\x00\x03"
-            start_index = response.find(pattern)
+            start_index = response.rfind(pattern)
             if start_index == -1:
                 LOGGER.error(
                     "Pattern 0x00 0x00 0x00 0x03 not found in the device response"
@@ -325,7 +326,8 @@ class GizwitsApi:
                 return None
 
             # Start evaluating bytes after the pattern for LEB128 encoded length
-            leb128_bytes = response[start_index + len(pattern) :]
+            leb128_start = start_index + len(pattern)
+            leb128_bytes = response[leb128_start:]
             length, leb128_length = self._decode_leb128(leb128_bytes)
             if length is None:
                 LOGGER.error(
@@ -333,15 +335,21 @@ class GizwitsApi:
                 )
                 return None
 
-            # Subtract 8 from the decoded length to get the device status payload length
-            N = length - 8
-
-            if N > 0 and N <= len(response):
-                # Extract the last N bytes as the device status payload
-                device_status_payload = response[-N:]
+            # Calculate the start of the payload (after header, length, flag, and command)
+            # Header (4 bytes) + LEB128 length + flag (1 byte) + command (2 bytes) = 7 + leb128_length
+            payload_start = start_index + 4 + leb128_length + 1 + 2
+            
+            # The length includes flag + command + payload, so subtract 3 (flag=1, command=2)
+            payload_length = length - 3
+            
+            if payload_length > 0 and payload_start + payload_length <= len(response):
+                # Extract the payload bytes
+                device_status_payload = response[payload_start:payload_start + payload_length]
+                LOGGER.debug("Extracted device status payload (length=%d): %s", payload_length, device_status_payload.hex())
                 return device_status_payload
             else:
-                LOGGER.error("Invalid device status payload length: %s", N)
+                LOGGER.error("Invalid device status payload length: %s (total response length: %s, payload_start: %s)", 
+                            payload_length, len(response), payload_start)
                 return None
         except Exception as e:
             LOGGER.error(f"Error in extracting device status payload: {e}")
@@ -369,13 +377,19 @@ class GizwitsApi:
         """Parse the device status payload based on the attribute model."""
         status_data = {}
         try:
+            # Check if model has position data (required for local parsing)
+            if not any("position" in attr for attr in attribute_model["attrs"]):
+                LOGGER.debug("Model does not have position data for local parsing, skipping")
+                return status_data
+
             # Convert bytes payload to a hexadecimal string if needed
             if isinstance(payload, bytes):
                 payload = payload.hex()
 
             # Check if endianness swap is needed
             swap_needed = any(
-                attr["position"]["byte_offset"] == 0
+                "position" in attr
+                and attr["position"]["byte_offset"] == 0
                 and (attr["position"]["bit_offset"] + attr["position"]["len"] > 8)
                 for attr in attribute_model["attrs"]
             )
@@ -389,6 +403,10 @@ class GizwitsApi:
 
             # Process each attribute in the attribute model
             for attr in attribute_model["attrs"]:
+                # Skip attributes without position data
+                if "position" not in attr:
+                    continue
+                    
                 byte_offset = attr["position"]["byte_offset"]
                 bit_offset = attr["position"]["bit_offset"]
                 length = attr["position"]["len"]

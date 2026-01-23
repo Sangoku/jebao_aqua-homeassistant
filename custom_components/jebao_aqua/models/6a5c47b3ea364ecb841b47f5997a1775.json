@@ -1,0 +1,146 @@
+{
+  "product_key": "6a5c47b3ea364ecb841b47f5997a1775",
+  "name": "Jebao MLW-20 Wavemaker Pump",
+  "attrs": [
+    {
+      "display_name": "Switch",
+      "name": "SwitchON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 0,
+      "desc": "Main power switch"
+    },
+    {
+      "display_name": "Feed Switch",
+      "name": "FeedSwitch",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 1,
+      "desc": "Feeding mode switch"
+    },
+    {
+      "display_name": "Timer Switch",
+      "name": "TimerON",
+      "data_type": "bool",
+      "type": "status_writable",
+      "id": 2,
+      "desc": "Timer mode switch"
+    },
+    {
+      "display_name": "Feed Time",
+      "name": "FeedTime",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 4,
+      "desc": "Feeding duration in minutes",
+      "unit": "min",
+      "min": 1,
+      "max": 60
+    },
+    {
+      "display_name": "Auto Feed Time",
+      "name": "AutoFeedTime",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 5,
+      "desc": "Auto feeding time",
+      "unit": "min",
+      "min": 0,
+      "max": 60
+    },
+    {
+      "display_name": "Auto Gears",
+      "name": "AutoGears",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 6,
+      "desc": "Auto mode gear setting",
+      "unit": "%",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "display_name": "Motor Speed",
+      "name": "Motor_Speed",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 7,
+      "desc": "Motor speed percentage",
+      "unit": "%",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "display_name": "Mode",
+      "name": "Mode",
+      "data_type": "uint8",
+      "type": "status_writable",
+      "id": 8,
+      "desc": "Operating mode"
+    },
+    {
+      "display_name": "Auto Mode",
+      "name": "AutoMode",
+      "data_type": "enum",
+      "type": "status_readonly",
+      "id": 9,
+      "desc": "Auto mode description"
+    },
+    {
+      "display_name": "Fault - Locked Rotor",
+      "name": "Fault_Lockedrotor",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 10,
+      "desc": "Locked rotor fault"
+    },
+    {
+      "display_name": "Fault - Over Temperature",
+      "name": "Fault_OverTemp",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 11,
+      "desc": "Over temperature fault"
+    },
+    {
+      "display_name": "Fault - Overcurrent",
+      "name": "Fault_Overcurrent",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 12,
+      "desc": "Overcurrent fault"
+    },
+    {
+      "display_name": "Fault - Overvoltage",
+      "name": "Fault_Overvoltage",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 13,
+      "desc": "Overvoltage fault"
+    },
+    {
+      "display_name": "Fault - UART",
+      "name": "Fault_UART",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 14,
+      "desc": "UART communication fault"
+    },
+    {
+      "display_name": "Fault - Undervoltage",
+      "name": "Fault_Undervoltage",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 15,
+      "desc": "Undervoltage fault"
+    },
+    {
+      "display_name": "Fault - No Live Load",
+      "name": "Fault_no_liveload",
+      "data_type": "bool",
+      "type": "fault",
+      "id": 16,
+      "desc": "No live load detected fault"
+    }
+  ]
+}

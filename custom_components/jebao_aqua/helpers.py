@@ -30,6 +30,8 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
     models_path = Path(hass.config.path("custom_components/jebao_aqua/models"))
     attribute_models = {}
 
+    LOGGER.info(f"Loading attribute models from: {models_path}")
+
     def _load_model(file_path):
         """Load a single model file."""
         with open(file_path, "r") as file:
@@ -43,9 +45,12 @@ async def load_attribute_models(hass: HomeAssistant) -> dict:
                 _load_model, model_file
             )
             attribute_models[product_key] = model
+            LOGGER.info(f"Loaded model for product_key: {product_key} from {model_file.name}")
         except Exception as e:
             LOGGER.error(f"Error loading model file {model_file}: {e}")
 
+    LOGGER.info(f"Total models loaded: {len(attribute_models)}")
+    LOGGER.info(f"Product keys: {list(attribute_models.keys())}")
     return attribute_models
 
 

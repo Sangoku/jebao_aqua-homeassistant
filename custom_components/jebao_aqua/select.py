@@ -27,8 +27,9 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("select", device_name, attribute["name"])
 
-        # Mapping the enum values to their descriptions
-        self._option_mapping = dict(zip(attribute["desc"], attribute["enum"]))
+        # Mapping the descriptions to their integer indices
+        # The API returns/expects integer indices (0, 1, 2, 3), not the Chinese enum strings
+        self._option_mapping = {desc: idx for idx, desc in enumerate(attribute["desc"])}
         self._options = list(self._option_mapping.keys())
 
     @property

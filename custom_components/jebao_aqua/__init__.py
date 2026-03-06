@@ -91,23 +91,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
             "attribute_models": attribute_models,
         }
 
-        # Auto-discover devices and update config entry if needed
+        # Auto-discover devices in the background so it doesn't block startup.
+        # Discovery always waits DISCOVERY_TIMEOUT seconds for broadcast responses,
+        # so running it as a background task avoids adding that delay to setup.
         if entry.data.get("auto_discover", True):  # Default to True if not specified
-            discovered_devices = await discover_devices()
-            if discovered_devices:
-                hass.data[DOMAIN][entry.entry_id]["discovered_devices"] = (
-                    discovered_devices
-                )
-                LOGGER.debug(f"Discovered devices during setup: {discovered_devices}")
+            async def _background_discovery():
+                discovered_devices = await discover_devices()
+                if discovered_devices:
+                    hass.data[DOMAIN][entry.entry_id]["discovered_devices"] = (
+                        discovered_devices
+                    )
+                    LOGGER.debug(f"Discovered devices during setup: {discovered_devices}")
 
-                # Update coordinator's device inventory with discovered IPs
-                for device in coordinator.device_inventory:
-                    device_id = device.get("did")
-                    if device_id in discovered_devices:
-                        device["lan_ip"] = discovered_devices[device_id]
-                        LOGGER.debug(
-                            f"Updated device {device_id} with discovered IP {discovered_devices[device_id]}"
-                        )
+                    # Update coordinator's device inventory with discovered IPs
+                    for device in coordinator.device_inventory:
+                        device_id = device.get("did")
+                        if device_id in discovered_devices:
+                            device["lan_ip"] = discovered_devices[device_id]
+                            LOGGER.debug(
+                                f"Updated device {device_id} with discovered IP {discovered_devices[device_id]}"
+                            )
+
+            hass.async_create_task(_background_discovery())
 
         # Replace multiple async_forward_entry_setup calls with single async_forward_entry_setups
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

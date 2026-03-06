@@ -239,8 +239,17 @@ class GizwitsApi:
         )
 
         try:
-            # Establish a connection with the local device
-            reader, writer = await asyncio.open_connection(device_ip, LAN_PORT)
+            # Establish a connection with the local device (5s timeout to avoid blocking startup)
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(device_ip, LAN_PORT),
+                    timeout=5.0,
+                )
+            except asyncio.TimeoutError:
+                LOGGER.warning(
+                    "TCP connection to local device %s timed out after 5s", device_ip
+                )
+                return None
 
             try:
                 # Perform necessary commands to retrieve device data

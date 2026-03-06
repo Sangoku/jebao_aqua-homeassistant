@@ -33,6 +33,16 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
         self._attr_unique_id = create_unique_id(device_id, attribute["name"])
         self.entity_id = create_entity_id("switch", device_name, attribute["name"])
 
+    async def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug(
+            "Coordinator update for switch %s (%s): device_data=%s",
+            self.name,
+            self._attr_key,
+            self.coordinator.data.get(self._device_id)
+        )
+        self.async_write_ha_state()
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""
@@ -47,19 +57,65 @@ class JebaoPumpSwitch(CoordinatorEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs):
         """Turn the switch on."""
+        LOGGER.debug(f"Sending turn_on command for {self._attr_name}")
         await self.coordinator.api.control_device(
             self._device["did"], {self._attribute["name"]: True}
         )
-        await asyncio.sleep(3)  # Wait for 3 seconds
-        await self.coordinator.async_request_refresh()
+        
+        # Initial wait for device to process command
+        await asyncio.sleep(5)
+        
+        # Poll with retries to verify state change
+        for attempt in range(3):
+            await self.coordinator.async_request_refresh()
+            device_data = self.coordinator.device_data.get(self._device["did"])
+            current_value = get_attribute_value(device_data, self._attribute["name"])
+            
+            LOGGER.debug(
+                f"Polling attempt {attempt + 1} for {self._attr_name}: current_value={current_value}"
+            )
+            
+            if current_value is True:
+                LOGGER.info(f"Switch {self._attr_name} state verified as ON after {attempt + 1} attempts")
+                return
+            
+            if attempt < 2:  # Don't sleep after last attempt
+                await asyncio.sleep(2)
+        
+        LOGGER.warning(
+            f"Switch {self._attr_name} state did not update to ON after 3 polling attempts"
+        )
 
     async def async_turn_off(self, **kwargs):
         """Turn the switch off."""
+        LOGGER.debug(f"Sending turn_off command for {self._attr_name}")
         await self.coordinator.api.control_device(
             self._device["did"], {self._attribute["name"]: False}
         )
-        await asyncio.sleep(3)  # Wait for 3 seconds
-        await self.coordinator.async_request_refresh()
+        
+        # Initial wait for device to process command
+        await asyncio.sleep(5)
+        
+        # Poll with retries to verify state change
+        for attempt in range(3):
+            await self.coordinator.async_request_refresh()
+            device_data = self.coordinator.device_data.get(self._device["did"])
+            current_value = get_attribute_value(device_data, self._attribute["name"])
+            
+            LOGGER.debug(
+                f"Polling attempt {attempt + 1} for {self._attr_name}: current_value={current_value}"
+            )
+            
+            if current_value is False:
+                LOGGER.info(f"Switch {self._attr_name} state verified as OFF after {attempt + 1} attempts")
+                return
+            
+            if attempt < 2:  # Don't sleep after last attempt
+                await asyncio.sleep(2)
+        
+        LOGGER.warning(
+            f"Switch {self._attr_name} state did not update to OFF after 3 polling attempts"
+        )
 
     @property
     def device_info(self):

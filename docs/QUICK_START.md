@@ -1,6 +1,6 @@
 # Jebao Aqua Integration - Quick Start for Maintainers
 
-This is a condensed reference guide for maintainers. For comprehensive details, see [MAINTENANCE_GUIDE.md](MAINTENANCE_GUIDE.md).
+This is a condensed reference guide for maintainers. For comprehensive details, see [MAINTENANCE_GUIDE.md](../MAINTENANCE_GUIDE.md).
 
 ## 🚀 Quick Setup
 
@@ -206,4 +206,4 @@ await self.coordinator.async_request_refresh()
 
 ---
 
-For comprehensive information, consult [MAINTENANCE_GUIDE.md](MAINTENANCE_GUIDE.md).
+For comprehensive information, consult [MAINTENANCE_GUIDE.md](../MAINTENANCE_GUIDE.md).

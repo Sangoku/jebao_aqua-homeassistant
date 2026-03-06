@@ -10,6 +10,7 @@ ha-config/blueprints/
 ha-config/custom_components/*
 !ha-config/custom_components/.gitkeep
 ha-config/__pycache__/
+ha-config/*.lock
 
 # Python
 __pycache__/
@@ -34,7 +35,11 @@ Thumbs.db
 
 # Logs
 *.log
+mode_debug_*.log
 
 # Temporary files
 *.tmp
 *.bak
+
+# Scripts output
+scripts/__pycache__/

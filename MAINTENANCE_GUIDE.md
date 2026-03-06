@@ -6,12 +6,13 @@
 3. [Key Components](#key-components)
 4. [Development Setup](#development-setup)
 5. [Code Structure](#code-structure)
-6. [Testing Procedures](#testing-procedures)
-7. [Adding New Device Models](#adding-new-device-models)
-8. [Common Maintenance Tasks](#common-maintenance-tasks)
-9. [Troubleshooting](#troubleshooting)
-10. [Contributing Guidelines](#contributing-guidelines)
-11. [Release Process](#release-process)
+6. [Known Device Limitations](#known-device-limitations)
+7. [Testing Procedures](#testing-procedures)
+8. [Adding New Device Models](#adding-new-device-models)
+9. [Common Maintenance Tasks](#common-maintenance-tasks)
+10. [Troubleshooting](#troubleshooting)
+11. [Contributing Guidelines](#contributing-guidelines)
+12. [Release Process](#release-process)
 
 ---
 
@@ -143,64 +144,20 @@ custom_components/jebao_aqua/
 
 ## Development Setup
 
-### Prerequisites
+> **See [CONTRIBUTING.md](CONTRIBUTING.md) for the full Docker-based development environment setup, quick start guide, and common development tasks.**
 
-```bash
-# Required
-- Python 3.9+
-- Home Assistant 2023.x or later
-- Git
+### Summary
 
-# Recommended
-- Visual Studio Code with Home Assistant extensions
-- A test Jebao device on the same network
-```
+The recommended development workflow uses Docker Compose to run a local Home Assistant instance with the integration mounted directly from source:
 
-### Local Development Environment
-
-1. **Clone the Repository**
 ```bash
 git clone https://github.com/chrisc123/jebao_aqua-homeassistant.git
 cd jebao_aqua-homeassistant
+docker-compose up -d
+# Open http://localhost:8123
 ```
 
-2. **Install Home Assistant Development Environment**
-```bash
-# Option 1: Container development
-docker run -d \
-  --name homeassistant \
-  --privileged \
-  --restart=unless-stopped \
-  -v /path/to/config:/config \
-  -v /etc/localtime:/etc/localtime:ro \
-  --network=host \
-  homeassistant/home-assistant:latest
-
-# Option 2: Virtual environment
-python3 -m venv venv
-source venv/bin/activate
-pip install homeassistant
-```
-
-3. **Link Integration to HA Config**
-```bash
-# Create custom_components directory
-mkdir -p ~/.homeassistant/custom_components
-
-# Symlink the integration
-ln -s /path/to/jebao_aqua-homeassistant/custom_components/jebao_aqua \
-      ~/.homeassistant/custom_components/jebao_aqua
-```
-
-4. **Enable Debug Logging**
-
-Add to `configuration.yaml`:
-```yaml
-logger:
-  default: info
-  logs:
-    custom_components.jebao_aqua: debug
-```
+Code changes take effect after `docker-compose restart homeassistant`.
 
 ### Development Tools
 
@@ -303,6 +260,42 @@ Local Protocol (TCP 12416):
 - `enum` - Selection from list
 - `uint8` - 8-bit unsigned integer
 - `binary` - Raw hex data
+
+---
+
+## Known Device Limitations
+
+### MLW Series Wavemaker (product_key: `54114ccdac1e41c0bb17e222887c07ba`)
+
+The MLW series (newer BLE-enabled models) has **incomplete firmware support** for both local LAN and cloud API protocols.
+
+**What works:**
+- ✅ Mode selection (Classic Wave, Sine Wave, Random Wave, Constant Flow) — via local UDP
+- ✅ Linkage setting (Independent, Primary, Secondary)
+- ✅ Basic switches (Main switch, Pulse/Tide, Feeding switch)
+- ✅ Cloud control commands
+
+**What doesn't work (firmware limitation, not an integration bug):**
+- ❌ Flow value monitoring — device only sends 1 byte of status data; bytes 2-4 (Flow, Frequency, FeedTime) are never transmitted
+- ❌ Frequency value monitoring
+- ❌ Feed Time value monitoring
+- ❌ Fault sensor reporting (Overcurrent, Overvoltage, OverTemp, etc.)
+
+**Root cause:** The MLW wavemaker sends only 1 byte of status data via both local LAN (TCP 12416) and cloud API. The model definition expects bytes at positions 2, 3, 4 for numeric values, but the device firmware does not transmit them. This is consistent across both communication paths, suggesting a firmware limitation rather than a protocol issue.
+
+**Timer switch behaviour:** The timer cannot be enabled when the main pump switch is OFF — this is a device-level safety feature, not a bug. Turn on the main switch first, then enable the timer.
+
+**Mode control:** MLW devices use local UDP protocol for mode changes (not cloud API). The integration detects MLW devices by product_key and routes mode commands accordingly.
+
+For full details, see [`docs/MLW_PROTOCOL_INVESTIGATION.md`](docs/MLW_PROTOCOL_INVESTIGATION.md) and [`docs/MLW_MODE_SELECTOR_FIX.md`](docs/MLW_MODE_SELECTOR_FIX.md).
+
+### Devices Without Local Model Files
+
+Devices without a matching JSON in `models/` automatically fall back to cloud API for all communication. This provides full functionality but without local LAN polling. To add local support, create a model file following the structure in [Adding New Device Models](#adding-new-device-models).
+
+### WiFi+BLE Devices (ESP32C3)
+
+Newer Jebao devices with both WiFi and Bluetooth (ESP32C3 microcontroller) are **not compatible** with this integration. The communication protocol appears to have changed. Only older WiFi-only devices (ESP8266) are supported.
 
 ---
 
@@ -1029,7 +1022,7 @@ Payload: Variable length
 - `0x0006`: Get binding key
 - `0x0008`: Authenticate
 - `0x0093`: Get device status
-- `0x0090`: Set device attributes (theory, not implemented)
+- `0x0090`: Set device attributes (implemented for MLW local control)
 
 ### LEB128 Encoding
 

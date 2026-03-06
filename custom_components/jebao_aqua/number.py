@@ -9,6 +9,7 @@ from .helpers import (
     is_device_data_valid,  # Add this import
     get_attribute_value,  # Add this import
 )
+import asyncio
 
 
 class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
@@ -34,6 +35,16 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
         # Set the unit of measurement if applicable
         self._attr_native_unit_of_measurement = attribute.get("unit")
 
+    async def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug(
+            "Coordinator update for number %s (%s): device_data=%s",
+            self.name,
+            self._attr_key,
+            self.coordinator.data.get(self._device_id)
+        )
+        self.async_write_ha_state()
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""
@@ -49,10 +60,34 @@ class JebaoPumpNumber(CoordinatorEntity, NumberEntity):
 
     async def async_set_native_value(self, value: float):
         """Set new value."""
+        LOGGER.debug(f"Sending set_native_value command for {self._attr_name}: {value}")
         await self.coordinator.api.control_device(
             self._device["did"], {self._attribute["name"]: value}
         )
-        await self.coordinator.async_request_refresh()
+        
+        # Initial wait for device to process command
+        await asyncio.sleep(5)
+        
+        # Poll with retries to verify state change
+        for attempt in range(3):
+            await self.coordinator.async_request_refresh()
+            device_data = self.coordinator.device_data.get(self._device["did"])
+            current_value = get_attribute_value(device_data, self._attribute["name"])
+            
+            LOGGER.debug(
+                f"Polling attempt {attempt + 1} for {self._attr_name}: current_value={current_value}, expected={value}"
+            )
+            
+            if current_value == value:
+                LOGGER.info(f"Number {self._attr_name} state verified as {value} after {attempt + 1} attempts")
+                return
+            
+            if attempt < 2:  # Don't sleep after last attempt
+                await asyncio.sleep(2)
+        
+        LOGGER.warning(
+            f"Number {self._attr_name} state did not update to {value} after 3 polling attempts"
+        )
 
     @property
     def device_info(self):

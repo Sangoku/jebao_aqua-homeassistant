@@ -9,6 +9,7 @@ from .helpers import (
     is_device_data_valid,
     get_attribute_value,
 )
+import asyncio
 
 
 class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
@@ -31,6 +32,16 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         # The API returns/expects integer indices (0, 1, 2, 3), not the Chinese enum strings
         self._option_mapping = {desc: idx for idx, desc in enumerate(attribute["desc"])}
         self._options = list(self._option_mapping.keys())
+
+    async def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        _LOGGER.debug(
+            "Coordinator update for select %s (%s): device_data=%s",
+            self.name,
+            self._attr_key,
+            self.coordinator.data.get(self._device_id)
+        )
+        self.async_write_ha_state()
 
     @property
     def available(self) -> bool:
@@ -56,10 +67,34 @@ class JebaoPumpSelect(CoordinatorEntity, SelectEntity):
         """Change the selected option."""
         # Convert the English description back to the enum value for the API call
         enum_value = self._option_mapping.get(option)
+        LOGGER.debug(f"Sending select_option command for {self._attr_name}: {option} (enum_value={enum_value})")
         await self.coordinator.api.control_device(
             self._device["did"], {self._attribute["name"]: enum_value}
         )
-        await self.coordinator.async_request_refresh()
+        
+        # Initial wait for device to process command
+        await asyncio.sleep(5)
+        
+        # Poll with retries to verify state change
+        for attempt in range(3):
+            await self.coordinator.async_request_refresh()
+            device_data = self.coordinator.device_data.get(self._device["did"])
+            current_value = get_attribute_value(device_data, self._attribute["name"])
+            
+            LOGGER.debug(
+                f"Polling attempt {attempt + 1} for {self._attr_name}: current_value={current_value}, expected={enum_value}"
+            )
+            
+            if current_value == enum_value:
+                LOGGER.info(f"Select {self._attr_name} state verified as {option} after {attempt + 1} attempts")
+                return
+            
+            if attempt < 2:  # Don't sleep after last attempt
+                await asyncio.sleep(2)
+        
+        LOGGER.warning(
+            f"Select {self._attr_name} state did not update to {option} after 3 polling attempts"
+        )
 
     @property
     def options(self):
